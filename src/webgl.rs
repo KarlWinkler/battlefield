@@ -50,20 +50,32 @@ pub fn start() -> Result<(), JsValue> {
 
     let mut rng = rand::thread_rng();
 
-    for i in 0..64 {
-      for j in 1..65 {
+    let radius = 1.0/13.0;
+    let diameter = radius * 2.0;
+    let y_origin = 1.0 - radius * 5.0/2.0;
+    let x_origin = -1.0 + diameter;
+
+    for i in 0..12 {
+      for j in 0..12 {
         // let x = ;
         // add_square(&mut vertices, x, 0.9, 0.05, 0.05);
 
-        if rng.gen_range(0..2) == 1 {
-          add_square(&mut vertices, -1.0 + (i as f32) * 2.0/64.0, 1.0 - (j as f32) * 2.0/64.0, 2.0/64.0, 2.0/64.0);
-        }
+        let x_row = x_origin + ((i as f32) % 2 as f32) * radius;
+
+        let y = y_origin - (j as f32) * diameter + radius * ((i % 2) as f32) ;
+        let x = x_origin + (i as f32) * diameter;
+        add_hexagon(&mut vertices, x, y, radius);
+
+        // if rng.gen_range(0..2) == 1 {
+          // add_hexagon(&mut vertices, x, y, radius);
+          // add_square(&mut vertices, -1.0 + (i as f32) * 2.0/64.0, 1.0 - (j as f32) * 2.0/64.0, 2.0/64.0, 2.0/64.0);
+        // }
 
       }
     }
 
-    add_square(&mut vertices, -0.85, 0.75, 0.05, 0.05);
-    add_square(&mut vertices, -0.8, 0.70, 0.05, 0.05);
+    // add_square(&mut vertices, -0.85, 0.75, 0.05, 0.05);
+    // add_square(&mut vertices, -0.8, 0.70, 0.05, 0.05);
 
     let position_attribute_location = context.get_attrib_location(&program, "position");
     let buffer = context.create_buffer().ok_or("Failed to create buffer")?;
@@ -152,6 +164,38 @@ fn add_square(
     vertices.push(x2);
     vertices.push(y1);
     vertices.push(0.0);
+}
+
+fn add_hexagon(
+    vertices: &mut Vec<f32>,
+    x: f32,
+    y: f32,
+    radius: f32,
+) {
+    let mut angle = 00.0;
+    let mut x1 = x + radius;
+    let mut y1 = y;
+
+    for _ in 0..6 {
+        let x2 = x + radius * ((angle + 60.0) as f32).to_radians().cos();
+        let y2 = y + radius * ((angle + 60.0) as f32).to_radians().sin();
+
+        vertices.push(x);
+        vertices.push(y);
+        vertices.push(0.0);
+
+        vertices.push(x1);
+        vertices.push(y1);
+        vertices.push(0.0);
+
+        vertices.push(x2);
+        vertices.push(y2);
+        vertices.push(0.0);
+
+        x1 = x2;
+        y1 = y2;
+        angle += 60.0;
+    }
 }
 
 pub fn compile_shader(
