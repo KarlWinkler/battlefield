@@ -1,37 +1,71 @@
-// impl Grid {
-//   pub fn new(width: u32, height: u32) -> Grid {
+#[path = "./tile/Tile.rs"]
+mod tile;
 
-//     Grid {
-//       width: width,
-//       height: height,
+pub struct Grid {
+  width: u32,
+  height: u32,
 
-//       vertices: Vec::<f32>::new(),
-//       idxs: Vec::<u16>::new()
-//     }
-//   }
+  cells: Vec::<tile::Tile>,
+  vertices: Vec::<f32>,
+  idxs: Vec::<u16>,
+}
 
-//   fn create_vertex_array(&mut self) {
+impl Grid {
+  pub fn new(width: u32, height: u32) -> Grid {
+    Grid {
+      width: width,
+      height: height,
 
-//     for each cell 
-//       add_square(&mut vertices, 0.8, 0.8, (1/width) 0.05, (1/height) 0.05);
-//   }
+      cells: Self::populate_cells(width, height),
+      vertices: Vec::<f32>::new(),
+      idxs: Vec::<u16>::new()
+    }
+  }
 
-//   fn draw(context: &WebGl2RenderingContext, vert_count: i32) {
-//     context.clear_color(0.0, 0.0, 0.0, 1.0);
-//     context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
+  fn populate_cells(width: u32, height: u32) -> Vec::<tile::Tile> {
+    let mut cells = Vec::<tile::Tile>::new();
 
-//     context.draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, vert_count);
-// }
+    let radius = 1.0/height as f32;
+    let diameter = radius * 2.0;
+    let y_origin = 1.0 - radius * 5.0/2.0;
+    let x_origin = -1.0 + radius;
+    let ratio = 0.5;
 
-//   fn _get_bit_by_index(&self, idx: u32) -> u8 {
-//     // divide by 8 to find byte
-//     let byte = self.cells[(idx/8) as usize];
+    for i in 0..width - 1 {
+      for j in 0..height - 1 {
 
-//     // modulo 8 to find index
-//     let bit = idx % 8;
-//     let mask = 1 << bit;
+        let y = y_origin - (j as f32) * diameter + radius * ((i % 2) as f32) ;
+        let x = x_origin + (i as f32) * ratio * diameter;
 
-//     // return
-//     (byte & mask) >> bit
-//   }
-// }
+        let tile = tile::Tile::new(x, y, radius * ratio, radius);
+        cells.push(tile);
+      }
+    }
+
+    cells
+  }
+
+  pub fn draw(&mut self) {
+    self.vertices.clear();
+
+    for i in &mut self.cells {
+      i.draw(&mut self.vertices);
+    }
+  }
+
+  pub fn get_vertices(&self) -> &Vec::<f32> {
+    &self.vertices
+  }
+
+  pub fn get_hex_hovered(&self, x: f32, y: f32) -> Option<u32> {
+    let mut idx = None;
+
+    for (i, cell) in self.cells.iter().enumerate() {
+      if cell.hovered(x, y) {
+        idx = Some(i as u32);
+      }
+    }
+
+    idx
+  }
+}
