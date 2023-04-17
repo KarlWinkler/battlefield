@@ -37,7 +37,7 @@ impl Grid {
         let y = y_origin - (j as f32) * diameter + radius * ((i % 2) as f32) ;
         let x = x_origin + (i as f32) * ratio * diameter;
 
-        let tile = tile::Tile::new(x, y, radius * ratio, radius);
+        let tile = tile::Tile::new(x, y, radius * ratio, radius, (i + j) as u32);
         cells.push(tile);
       }
     }
@@ -67,5 +67,23 @@ impl Grid {
     }
 
     idx
+  }
+
+  pub fn to_array_ptr(&self) -> *const u8 {
+    let cells_array = self.cells.iter().map(|cell| [cell.get_x(), cell.get_y()]).collect::<Vec<[f32; 2]>>();
+    cells_array.as_ptr() as *const u8
+  }
+
+  pub fn hit(&self, x: f32, y: f32) -> i32 {
+    let mut i = 0;
+    for cell in &self.cells {
+      if cell.hovered(x, y) {
+        return i;
+      }
+
+      i+=1;
+    }
+
+    return -1;
   }
 }

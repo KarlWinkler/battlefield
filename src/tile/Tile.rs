@@ -6,16 +6,18 @@ pub struct Tile {
   width: f32,
   height: f32,
   tile_vertices: Vec::<Vec<f32>>,
+  index: u32
 }
 
 impl Tile {
-  pub fn new(x: f32, y: f32, width: f32, height: f32) -> Tile {
+  pub fn new(x: f32, y: f32, width: f32, height: f32, index: u32) -> Tile {
     Tile {
       x,
       y,
       width,
       height,
       tile_vertices: Self::define_vertices(x, y, width, height),
+      index
     }
   }
 
@@ -54,6 +56,8 @@ impl Tile {
         vertices.push(y2);
         vertices.push(0.0);
 
+        self.tile_vertices.push(vec![x1, y1]);
+
         x1 = x2;
         y1 = y2;
         angle += 60.0;
@@ -70,7 +74,9 @@ impl Tile {
       let p1 = &self.tile_vertices[i];
       let p2 = &self.tile_vertices[i + 1];
 
-      if Self::is_in_triangle(&p1, &p2, &p3, &p_mouse) {
+      if self.is_in_triangle(&p1, &p2, &p3, &p_mouse) {
+        log::info!("test: {}", self.is_in_triangle(&vec![1.0, 0.0], &vec![5.0, 1.0], &vec![3.0, 6.0], &vec![2.0, 5.0]));
+
         return true;
       }
     }
@@ -78,13 +84,26 @@ impl Tile {
     false
   }
 
-  fn is_in_triangle(p1: &Vec<f32>, p2: &Vec<f32>, p3: &Vec<f32>, p: &Vec<f32>) -> bool {
-    let denominator = (p2[1] - p3[1]) * (p1[0] - p3[0]) + (p3[0] - p2[0]) * (p1[1] - p3[1]);
-    let a = (p2[1] - p3[1]) * (p[0] - p3[0]) + (p3[0] - p2[0]) * (p[1] - p3[1]) / denominator; 
-    let b = (p3[1] - p1[1]) * (p[0] - p3[0]) + (p1[0] - p3[0]) * (p[1] - p3[1]) / denominator;
-    let c = 1.0 - a - b;
+  // calculate area of triangle using cross product
+  fn area(p1: &Vec<f32>, p2: &Vec<f32>, p3: &Vec<f32>) -> f32 {
+    let a = 0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1]));
 
-    if a >= 0.0 && b >= 0.0 && c >= 0.0 { 
+    a.abs()
+  }
+
+  fn is_in_triangle(&self, p1: &Vec<f32>, p2: &Vec<f32>, p3: &Vec<f32>, p: &Vec<f32>) -> bool {
+    
+    let area = Self::area(p1, p2, p3);
+
+    let a1 = Self::area(p1, p2, p);
+    let a2 = Self::area(p2, p3, p);
+    let a3 = Self::area(p3, p1, p);
+
+    let a = a1 + a2 + a3;
+
+    let a_delta = (area - a).abs(); 
+
+    if a_delta < 0.001 {
       true
     }
     else {
@@ -93,13 +112,31 @@ impl Tile {
   }
 
   fn define_vertices(x: f32, y: f32, width: f32, height: f32) -> Vec<Vec<f32>> {
-    let v1 = vec![x - width / 4.0, y + height / 2.0];
-    let v2 = vec![x + width / 4.0, y + height / 2.0];
-    let v3 = vec![x + width / 2.0, y];
-    let v4 = vec![x + width / 4.0, y - height / 2.0];
-    let v5 = vec![x - width / 4.0, y - height / 2.0];
-    let v6 = vec![x - width / 2.0, y];
+    let mut tile_vertices = Vec::<Vec<f32>>::new();
 
-    vec![v1, v2, v3, v4, v5, v6]
+    let mut angle = 0.0;
+    let mut x1 = x + width;
+    let mut y1 = y;
+
+    for _ in 0..6 {
+      let x2 = x + width * ((angle + 60.0) as f32).to_radians().cos();
+      let y2 = y + height * ((angle + 60.0) as f32).to_radians().sin();
+
+      tile_vertices.push(vec![x1, y1]);
+
+      x1 = x2;
+      y1 = y2;
+      angle += 60.0;
+    }
+
+    tile_vertices
+  }
+
+  pub fn get_x(&self) -> f32 {
+    self.x
+  }
+
+  pub fn get_y(&self) -> f32 {
+    self.y
   }
 }
