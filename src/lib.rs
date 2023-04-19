@@ -70,7 +70,7 @@ impl Universe {
       self.height
   }
 
-  pub fn hit(&self, x_mouse: f32, y_mouse: f32) -> i32 {
+  pub fn hit(&mut self, x_mouse: f32, y_mouse: f32) -> i32 {
     log::info!("Hit: {}, {}", x_mouse, y_mouse);
     let hex = self.grid.hit(x_mouse, y_mouse);
     log::info!("{}", hex);

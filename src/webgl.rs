@@ -1,3 +1,5 @@
+// this will be cursed
+
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
@@ -31,6 +33,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
         "##,
     )?;
 
+    // base colour for hexes
     let frag_shader = compile_shader(
         &context,
         WebGl2RenderingContext::FRAGMENT_SHADER,
@@ -47,6 +50,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
     let program = link_program(&context, &vert_shader, &frag_shader)?;
     context.use_program(Some(&program));
 
+    // add all vertices of the grid to the vertex buffer
     grid.draw();
 
     let position_attribute_location = context.get_attrib_location(&program, "position");
@@ -95,6 +99,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
 }
 
 fn draw(context: &WebGl2RenderingContext, vert_count: i32) {
+    // background colour
     context.clear_color(0.0, 0.0, 0.2, 1.0);
     context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
 

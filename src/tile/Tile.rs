@@ -6,7 +6,8 @@ pub struct Tile {
   width: f32,
   height: f32,
   tile_vertices: Vec::<Vec<f32>>,
-  index: u32
+  index: u32,
+  selected: bool,
 }
 
 impl Tile {
@@ -17,7 +18,8 @@ impl Tile {
       width,
       height,
       tile_vertices: Self::define_vertices(x, y, width, height),
-      index
+      index,
+      selected: false
     }
   }
 
@@ -26,41 +28,21 @@ impl Tile {
   }
 
   fn add_hexagon(&mut self, vertices: &mut Vec<f32>) {
-
-    let vertices = vertices;
-    let x = self.x;
-    let y = self.y;
-    let width = self.width;
-    let height = self.height;
-
-    let mut angle = 0.0;
-    let mut x1 = x + width;
-    let mut y1 = y;
-
-    for _ in 0..6 {
-        let x2 = x + width * ((angle + 60.0) as f32).to_radians().cos();
-        let y2 = y + height * ((angle + 60.0) as f32).to_radians().sin();
-
+    for i in 0..6 {
         // center point
-        vertices.push(x);
-        vertices.push(y);
+        vertices.push(self.x);
+        vertices.push(self.y);
         vertices.push(0.0);
 
         // first point
-        vertices.push(x1);
-        vertices.push(y1);
+        vertices.push(self.tile_vertices[i % 6][0]);
+        vertices.push(self.tile_vertices[i % 6][1]);
         vertices.push(0.0);
 
         // second point
-        vertices.push(x2);
-        vertices.push(y2);
+        vertices.push(self.tile_vertices[(i + 1) % 6][0]);
+        vertices.push(self.tile_vertices[(i + 1) % 6][1]);
         vertices.push(0.0);
-
-        self.tile_vertices.push(vec![x1, y1]);
-
-        x1 = x2;
-        y1 = y2;
-        angle += 60.0;
     }
   }
 
@@ -82,6 +64,26 @@ impl Tile {
     }
 
     false
+  }
+
+  pub fn toggle_selected(&mut self) {
+    self.selected = !self.selected;
+
+    if self.selected {
+      self.expand();
+    } else {
+      self.contract();
+    }
+  }
+
+  fn expand(&mut self) {
+    self.height *= 1.1;
+    self.width *= 1.1;
+  }
+
+  fn contract(&mut self) {
+    self.height /= 1.1;
+    self.width /= 1.1;
   }
 
   // calculate area of triangle using cross product

@@ -74,10 +74,11 @@ impl Grid {
     cells_array.as_ptr() as *const u8
   }
 
-  pub fn hit(&self, x: f32, y: f32) -> i32 {
+  pub fn hit(&mut self, x: f32, y: f32) -> i32 {
     let mut i = 0;
-    for cell in &self.cells {
+    for cell in &mut self.cells {
       if cell.hovered(x, y) {
+        cell.toggle_selected();
         return i;
       }
 

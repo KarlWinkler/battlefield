@@ -16,4 +16,6 @@ canvas.addEventListener("click", event => {
 
   console.log(universe.hit(x, y));
   console.log(universe.height());
+
+  universe.tick();
 });
