@@ -57,6 +57,18 @@ impl Grid {
     &self.vertices
   }
 
+  pub fn get_selected(&mut self) -> Vec::<f32> {
+    let mut selected = Vec::<f32>::new();
+
+    for i in &mut self.cells {
+      if i.get_selected() {
+        i.draw(&mut selected);
+      }
+    }
+
+    selected
+  }
+
   pub fn get_hex_hovered(&self, x: f32, y: f32) -> Option<u32> {
     let mut idx = None;
 

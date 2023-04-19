@@ -2,6 +2,7 @@
 
 mod utils;
 mod webgl;
+mod webgl_second;
 
 extern crate console_error_panic_hook;
 
@@ -33,13 +34,15 @@ extern {
 pub struct Universe {
     width: u32,
     height: u32,
-    grid: webgl::grid::Grid
+    grid: webgl::grid::Grid,
+    grid_second: webgl_second::grid::Grid
 }
 
 #[wasm_bindgen]
 impl Universe {
   pub fn tick(&mut self) {
     let mut webgl_result = webgl::run(&mut self.grid);
+    let mut webgl_result = webgl_second::run(&mut self.grid_second);
 
     webgl_result = match webgl_result {
         Ok(_) => Ok(()),
@@ -54,11 +57,13 @@ impl Universe {
       panic::set_hook(Box::new(console_error_panic_hook::hook));
 
       let grid = webgl::grid::Grid::new(26, 13);
+      let grid_second = webgl_second::grid::Grid::new(26, 13);
 
       Universe {
           width,
           height,
           grid,
+          grid_second
       }
   }
 
@@ -72,7 +77,7 @@ impl Universe {
 
   pub fn hit(&mut self, x_mouse: f32, y_mouse: f32) -> i32 {
     log::info!("Hit: {}, {}", x_mouse, y_mouse);
-    let hex = self.grid.hit(x_mouse, y_mouse);
+    let hex = self.grid_second.hit(x_mouse, y_mouse);
     log::info!("{}", hex);
 
     hex

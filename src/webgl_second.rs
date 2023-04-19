@@ -43,7 +43,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
         out vec4 outColor;
         
         void main() {
-            outColor = vec4(1, 0.2, 0.2, 1);
+            outColor = vec4(1, 1, 0.2, 1);
         }
         "##,
     )?;
@@ -67,7 +67,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
     context.use_program(Some(&program));
 
     // add all vertices of the grid to the vertex buffer
-    grid.draw();
+    let vertices = grid.get_selected();
 
     let position_attribute_location = context.get_attrib_location(&program, "position");
     let buffer = context.create_buffer().ok_or("Failed to create buffer")?;
@@ -82,7 +82,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
     // As a result, after `Float32Array::view` we have to be very careful not to
     // do any memory allocations before it's dropped.
     unsafe {
-        let positions_array_buf_view = js_sys::Float32Array::view(&grid.get_vertices());
+        let positions_array_buf_view = js_sys::Float32Array::view(&vertices);
 
         context.buffer_data_with_array_buffer_view(
             WebGl2RenderingContext::ARRAY_BUFFER,
@@ -108,7 +108,7 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
 
     context.bind_vertex_array(Some(&vao));
 
-    let vert_count = (grid.get_vertices().len() / 3) as i32;
+    let vert_count = (vertices.len() / 3) as i32;
     draw(&context, vert_count);
 
     Ok(())
@@ -116,8 +116,6 @@ pub fn run(grid: &mut grid::Grid) -> Result<(), JsValue> {
 
 fn draw(context: &WebGl2RenderingContext, vert_count: i32) {
     // background colour
-    context.clear_color(0.0, 0.0, 0.2, 1.0);
-    context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
 
     context.draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, vert_count);
 }

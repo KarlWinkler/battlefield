@@ -74,6 +74,8 @@ impl Tile {
     } else {
       self.contract();
     }
+
+    self.tile_vertices = Self::define_vertices(self.x, self.y, self.width, self.height);
   }
 
   fn expand(&mut self) {
@@ -140,5 +142,9 @@ impl Tile {
 
   pub fn get_y(&self) -> f32 {
     self.y
+  }
+
+  pub fn get_selected(&self) -> bool {
+    self.selected
   }
 }
